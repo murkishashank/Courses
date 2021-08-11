@@ -2,97 +2,136 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Course</title>
+	<title>Syllabus</title>
 	<link rel="stylesheet" type="text/css" href="course.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script type="text/javascript">
 		const syllabusList = [];
-		var isEditable = 0;
+		
 		$(function() {
 			$("#form").hide();
 		});
 
-		function addSyllabus() {
+		function addSyllabus(index) {
 			$("#form").show();
 			let cardNumber = syllabusList.length + 1;
 			$("#index1").html("Syllabus " + cardNumber);
 		}
 
+		function createCard(index, syllabusItem) {
+			let card = `<div id="card${index}" class="syllabusCard">
+								<div id="cardBody${index}" class="cardBody">
+									<div id="anchorDiv${index}">
+										<a class="index">Syllabus ${index + 1}</a>
+									</div>
+									<h2 class="cardTitle">${syllabusItem["title"]}</h2>
+									<p class="cardDescription">${syllabusItem["description"]}</p>
+									<ul id="nav${index}" class="actionsNav alignRight">
+										<li class="actionsNav-item">
+											<a id="editbtn" href="javascript:edit(${index})" class="actionsNav-link">Edit</a>
+										</li>
+										<li class="actionsNav-item">
+											<a href="javascript:deleteSyllabus(${index})" class="actionsNav-link">Delete</a>
+										</li>
+										</ul>
+								</div>
+							</div>`;
+			return card;
+		}
 
-		function showCards() {
-			$("#cardsDiv").html("");
+		function renderCards() {
 			let index = 0;
-			for (const obj of syllabusList) {
-				let card = `<div id="card${index}" class="syllabusCard"><div id="cardBody${index}" class="cardBody"><div id="anchorDiv${index}"><a class="index">Syllabus ${index + 1}</a></div><h2 class="cardTitle">${obj["title"]}</h2><p class="cardDescription">${obj["description"]}</p><ul id="nav${index}" class="actionsNav alignRight"><li class="actionsNav-item"><a id="editbtn" href="javascript:edit(${index})" class="actionsNav-link">Edit</a></li><li class="actionsNav-item"><a href="javascript:deleteSyllabus(${index})" class="actionsNav-link">Delete</a></li></ul></div></div>`;
-				$("#cardsDiv").append(card);
+			$("#cardsDiv").html("");
+			for (const syllabusItem of syllabusList) {
+				if (syllabusItem["editMode"] == "false") {
+					var HTMLBlock = createCard(index, syllabusItem);
+				}
+				else {
+					var HTMLBlock = showForm(index, syllabusItem)
+				}
+				$("#cardsDiv").append(HTMLBlock);
 				index++;
 			}
+		}
+
+		function showForm(index, syllabusItem) {
+			let form = `<div id="form" class="container">
+					<div class="formIndex">
+						<a class="index" id="index">Syllabus ${index + 1}</a>
+					</div>
+					<label for="syllabusTitle${index}" class="textBoxLabel">Title</label>
+					<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}"><br>
+					<label for="syllabusDescription${index}" class="textBoxLabel">Description</label>
+					<input type="text" name="syllabusDescription${index}" id="syllabusDescription${index}" class="textBox" value="${syllabusItem["description"]}"><br>
+					<label for="syllabusTags${index}" class="textBoxLabel">Tags</label>
+					<input type="text" name="syllabusTags${index}" id="syllabusTags${index}" class="textBox" value="${syllabusItem["tags"]}"><br>
+					<button id="savebtn" class="alignRight formBtn" onclick="saveData(${index})">Save</button>
+					<button class="alignRight formBtn" onclick="removeForm1(${index})">Cancel</button>
+				   </div>`;
+			return form;
+		}
+
+		function removeForm1(index) {
+			$("#form").hide(); 
+			syllabusList[index]["editMode"] = "false";
+			renderCards();
 		}
 
 		function deleteSyllabus(index) {
 			let deleteCardId = "#card" + index;
 			syllabusList.splice(index, 1);
-			showCards();
+			renderCards();
 		}
 
 		function edit(index) {
 			let editCardId = "#card" + index;
-			// $("#editbtn").prop("disabled", "true");
 			let counter = 0;
-			for (const obj of syllabusList) {
+			for (const syllabusItem of syllabusList) {
 				if (counter == index) {
-					let title = syllabusList[index].title;
-					let description = syllabusList[index].description;
-					let tags = syllabusList[index].tags;
-					let form = `<div id="form" class="container"><div class="formIndex"><a class="index" id="index2"></a></div><label for="syllabusTitle" class="textBoxLabel">Title</label><input type="text" name="syllabusTitle" id="syllabusTitle" class="textBox" value="${obj["title"]}"><br><label for="syllabusDescription" class="textBoxLabel">Description</label><input type="text" name="syllabusDescription" id="syllabusDescription" class="textBox" value="${obj["description"]}"><br><label for="syllabusTags" class="textBoxLabel">Tags</label><input type="text" name="syllabusTags" id="syllabusTags" class="textBox" value="${obj["tags"]}"><br><button id="savebtn" class="alignRight formBtn" onclick="saveData(this)">Save</button><button class="alignRight formBtn" onclick="$(\'#form\').hide(); showCards()">Cancel</button></div>`;
+					syllabusList[index]["editMode"] = "true";
+					let form = showForm(index, syllabusItem);
 					$(editCardId).replaceWith(form);
-					isEditable = 1;
-					let cardNumber = index + 1;
-					$("#index2").html("Syllabus " + cardNumber);
 				}
 				counter++;
 			}
 		}
 
+		function clearInputBoxes(index) {
+			$("#syllabusTitle" + index).val("");
+			$("#syllabusDescription" + index).val("");
+			$("#syllabusTags" + index).val("");
+		}
+
 		function saveData(index) {
 			$("#form").hide();
-			$("#savebtn").prop("disabled", "true");
-			let title = $("#syllabusTitle").val();
-			let description = $("#syllabusDescription").val();
-			let tags = $("#syllabusTags").val();
-			formData = {title:title,description:description,tags:tags};
-			if (isEditable == 0) {
-				let counter = 0;
+			formData = {title:$("#syllabusTitle"+index+"").val(),description:$("#syllabusDescription"+index+"").val(),tags:$("#syllabusTags"+index+"").val(), editMode:"false"};
+			if (index == -1) {
 				syllabusList.push(formData);
-				$("#syllabusTitle").val("");
-				$("#syllabusDescription").val("");
-				$("#syllabusTags").val("");
+				clearInputBoxes(index);
 			}
 			else {
 				syllabusList[index] = formData;
 			}
-			isEditable = 0;
-			showCards();
+			renderCards();
 		}
 	</script>
 </head>
 <body>
-	<button class="addSyllabus alignRight" id="addSyllabus" onclick="addSyllabus()">Add Syllabus</button>
+	<button class="addSyllabus alignRight" id="addSyllabus" onclick="addSyllabus(-1)">Add Syllabus</button>
 	<div style="border: 1px solid #fff;" class="container cardContainer" id="cardsDiv"></div>
+	<div id="formContainer"></div>
 	<div id="form" class="container">
 		<div class="formIndex">
 			<a class="index" id="index1">Course 1</a>
 		</div>
-		<form>
-			<label for="syllabusTitle" class="textBoxLabel">Title</label>
-			<input type="text" name="syllabusTitle" id="syllabusTitle" class="textBox" onkeyup="if(this.textLength != 0) {savebtn.disabled = false} else {savebtn.disabled = true}" required><br>
-			<label for="syllabusDescription" class="textBoxLabel">Description</label>
-			<input type="text" name="syllabusDescription" id="syllabusDescription" class="textBox" required><br>
-			<label for="syllabusTags" class="textBoxLabel">Tags</label>
-			<input type="text" name="syllabusTags" id="syllabusTags" class="textBox" required><br>
-			<button id="savebtn" class="alignRight formBtn" onclick="saveData()" disabled>Save</button>
-			<button class="alignRight formBtn" onclick='$("#form").hide()'>Cancel</button>
-		</form>
+		<label for="syllabusTitle-1" class="textBoxLabel">Title</label>
+		<input type="text" name="syllabusTitle-1" id="syllabusTitle-1" class="textBox" onkeyup="if(this.textLength != 0) {savebtn.disabled = false} else {savebtn.disabled = true}" required><br>
+		<label for="syllabusDescription-1" class="textBoxLabel">Description</label>
+		<input type="text" name="syllabusDescription-1" id="syllabusDescription-1" class="textBox" required><br>
+		<label for="syllabusTags-1" class="textBoxLabel">Tags</label>
+		<input type="text" name="syllabusTags-1" id="syllabusTags-1" class="textBox" required><br>
+		<button id="savebtn" class="alignRight formBtn" onclick="saveData(-1)" disabled>Save</button>
+		<button class="alignRight formBtn" onclick='$("#form").hide()'>Cancel</button>
 	</div>
 </body>
 </html>
