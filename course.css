@@ -1,0 +1,105 @@
+.addSyllabus {
+	margin-right: 150px;
+	display: block;
+}
+
+.alignRight {
+	float: right !important;
+}
+.container {
+	padding-right: 100px;
+	padding-left: 100px;
+	margin-right: auto;
+	margin-left: auto;
+	/*border: 1px solid #000;*/
+}
+
+.cardContainer {
+	margin-top: 50px;
+}
+
+.syllabusCard {
+	margin: 40px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	word-wrap: break-word;
+	background-color: #fff;
+	background-clip: border-box;
+	border: 1px solid rgba(0,0,0,.125);
+	border-radius: .25rem;
+}
+
+.cardBody {
+	flex: 1 1 auto;
+	padding: 1rem 1rem;
+}
+
+.cardTitle {
+	margin-bottom: .5rem;
+}
+
+.actionsNav {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	padding-left: 0;
+	margin-top: -60px;
+	list-style: none;
+}
+
+.actionsNav-item {
+	display: list-item;
+	text-align: -webkit-match-parent;
+}
+
+.actionsNav-link {
+	display: block;
+	padding: .5rem 1rem;
+	color: #0d6efd;
+	text-decoration: none;
+}
+
+.textBox {
+	display: block;
+	width: 90%;
+	border: 1px solid rgba(0,0,0,.125);
+	margin-left: 50px;
+	margin-bottom: 10px;
+	padding: 10px;
+	border-radius: .25rem;
+}
+
+	
+.textBoxLabel {
+	margin-left: 50px;
+	font-size: 25px;
+	display: block;
+}
+
+.formBtn {
+	margin: 5px;
+}
+
+.index {
+	margin-top: 20px;
+	width: 30px;
+	height: 20px;
+	align-items: center;
+	padding: 10px;
+	background-color: aquamarine;
+	border: 1px solid aquamarine;
+	border-radius: 5px;
+}
+
+.formIndex {
+	margin-bottom: 15px;
+	margin-left: 50px;
+}
+
+/*input:required:invalid, input:focus:invalid {
+	
+	 insert your own styles for invalid form input 
+	/*-moz-box-shadow: none;*/
+/*}*/

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Syllabus</title>
+	<link rel="stylesheet" type="text/css" href="course.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		const syllabusList = [];
+		var emptySyllabusItem = {title:"",description:"",tags:"",editMode:"true"};
+
+		function validateForm() {
+			$('#syllabusForm input').each(function() {
+				let id = $(this).attr("id");
+				let value = $("#"+id).val();
+				let errorid = `#error${id}`;
+				if (value == '') {
+					$(errorid).html("Enter Valid input");
+					$("#savebtn").prop("disabled", "false");
+				}
+				else {
+					$(errorid).html("");
+					$("#savebtn").prop("disabled", "true");
+				}
+			})
+		}
+
+		function addSyllabus() {
+			index = syllabusList.length;
+			alert(index);
+			saveData(index);
+		}
+
+		function createCard(index, syllabusItem) {
+			let card = `<div id="card" class="syllabusCard">
+								<div id="cardBody" class="cardBody">
+									<div id="anchorDiv">
+										<a class="index">Syllabus ${index + 1}</a>
+									</div>
+									<h2 class="cardTitle">${syllabusItem["title"]}</h2>
+									<p class="cardDescription">${syllabusItem["description"]}</p>
+									<ul id="nav$" class="actionsNav alignRight">
+										<li class="actionsNav-item">
+											<a id="editbtn" href="javascript:edit(${index})" class="actionsNav-link">Edit</a>
+										</li>
+										<li class="actionsNav-item">
+											<a href="javascript:deleteSyllabus(${index})" class="actionsNav-link">Delete</a>
+										</li>
+									</ul>
+								</div>
+						</div>`;
+			return card;
+		}
+
+		function renderCards() {
+			let index = 0;
+			$("#cardsDiv").html("");
+			for (const syllabusItem of syllabusList) {
+				console.log(syllabusItem);
+				if (syllabusItem["editMode"] == "false") {
+					var HTMLBlock = createCard(index, syllabusItem);
+				}
+				else {
+					var HTMLBlock = showForm(index, syllabusItem)
+				}
+				$("#cardsDiv").append(HTMLBlock);
+				index++;
+			}
+		}
+
+		function showForm(index, syllabusItem) {
+			let form = `<div id="form">
+							<form id="syllabusForm">
+								<div class="formIndex">
+									<a class="index" id="index">Syllabus ${index + 1}</a>
+								</div>
+								<label for="syllabusTitle${index}" class="textBoxLabel">Title</label>
+								<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}" onblur="validateForm()" required autocomplete="off">
+								<label id="errorsyllabusTitle${index}" style="color:red"></label><br>
+								<label for="syllabusDescription${index}" class="textBoxLabel">Description</label>
+								<input type="text" name="syllabusDescription${index}" id="syllabusDescription${index}" class="textBox" value="${syllabusItem["description"]}" onblur="validateForm()" required autocomplete="off">
+								<label id="errorsyllabusDescription${index}" style="color:red"></label><br>
+								<label for="syllabusTags${index}" class="textBoxLabel">Tags</label>
+								<input type="text" name="syllabusTags${index}" id="syllabusTags${index}" class="textBox" value="${syllabusItem["tags"]}" onblur="validateForm(id)" required autocomplete="off">
+								<label id="errorsyllabusTags${index}" style="color:red"></label><br>
+								<button id="savebtn" class="alignRight formBtn" onclick="saveData(${index})">Save</button>
+								<button class="alignRight formBtn" onclick="cancel(${index})">Cancel</button>
+							</form>
+						</div>`;
+			return form;
+		}
+
+		function cancel(index) {
+			if(index + 1 == syllabusList.length) {
+				syllabusList.splice(index, 1);
+			}
+			else{
+				syllabusList[index]["editMode"]= "false";
+			}
+			renderCards();
+		}
+
+		function deleteSyllabus(index) {
+			syllabusList.splice(index, 1);
+			renderCards();
+		}
+
+		function edit(index) {
+			syllabusList[index]["editMode"] = "true";
+			renderCards();
+		}
+
+		function saveData(index) {
+			if (index == syllabusList.length) {
+				syllabusList.push(emptySyllabusItem);
+			}
+			else {
+				formData = {title:$("#syllabusTitle"+index+"").val(),description:$("#syllabusDescription"+index+"").val(),tags:$("#syllabusTags"+index+"").val(), editMode:"false"};
+				syllabusList[index] = formData;
+			}
+			renderCards();
+		};
+	</script>
+</head>
+<body>
+	<button class="addSyllabus alignRight" id="addSyllabus" onclick="addSyllabus()">Add Syllabus</button>
+	<div style="border: 1px solid #fff;" class="container cardContainer" id="cardsDiv"></div>
+</body>
+</html>
