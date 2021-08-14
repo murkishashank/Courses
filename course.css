@@ -97,3 +97,8 @@
 	margin-bottom: 15px;
 	margin-left: 50px;
 }
+.errorMessage {
+	margin-left: 50px;
+	color: red;
+	/*display: block;	*/
+}
