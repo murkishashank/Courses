@@ -8,12 +8,12 @@
 	<script type="text/javascript">
 		const syllabusList = [];
 		const syllabusListErrors = [];
-		var errorData = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
 
 		function addSyllabus() {
 			let emptySyllabusItem = {title:"",description:"",tags:"",editMode:true};
+			let emptySyllabusItemErrors = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true};
 			syllabusList.push(emptySyllabusItem);
-			syllabusListErrors.push(errorData);
+			syllabusListErrors.push(emptySyllabusItemErrors);
 			renderCards();
 		}
 
@@ -78,20 +78,20 @@
 								<label for="syllabusTags${index}" class="textBoxLabel">Tags</label>
 								${formhtml2}								
 								<button id="savebtn" class="alignRight formBtn" onclick="saveData(${index})">Save</button>
-								<button class="alignRight formBtn" onclick="cancel(${index})">Cancel</button>
+								<button class="alignRight formBtn" onclick="syllabusList[${index}][\'editMode\']=false; renderCards()">Cancel</button>
 						</div>`;
 			return form;
 		}
 
-		function cancel(index) {
-			if(index + 1 == syllabusList.length) {
-				deleteSyllabus(index);
-			}
-			else{
-				syllabusList[index]["editMode"]= false;
-			}
-			renderCards();
-		}
+		// function cancel(index) {
+		// 	if(index + 1 == syllabusList.length) {
+		// 		deleteSyllabus(index);
+		// 	}
+		// 	else{
+		// 		syllabusList[index]["editMode"]= false;
+		// 	}
+		// 	renderCards();
+		// }
 
 		function deleteSyllabus(index) {
 			syllabusList.splice(index, 1);
@@ -108,6 +108,7 @@
 			let title = $("#syllabusTitle"+index).val();
 			let description = $("#syllabusDescription"+index).val();
 			let tags = $("#syllabusTags"+index).val();
+			let errorData = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
 			if (title.length <= 0) {
 				errorData.isTitleValid = false;
 				editMode = true;
