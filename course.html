@@ -7,25 +7,14 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script type="text/javascript">
 		const syllabusList = [];
-		var emptySyllabusItem = {title:"",description:"",tags:"",editMode:"true"};
-
-		function validateForm(id) {
-			value = $("#"+id).val();
-			errorid = `#error${id}`;
-			if (value == '') {
-				$(errorid).html("Enter Valid input");
-				// $("#savebtn").prop("disabled", "false");
-			}
-			else {
-				$(errorid).html("");
-				// $("#savebtn").prop("disabled", "true");
-			}
-		}
+		const syllabusListErrors = [];
 
 		function addSyllabus() {
-			index = syllabusList.length;
-			alert(index);
-			saveData(index);
+			let emptySyllabusItem = {title:"",description:"",tags:"",editMode:true};
+			let emptySyllabusItemErrors = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true};
+			syllabusList.push(emptySyllabusItem);
+			syllabusListErrors.push(emptySyllabusItemErrors);
+			renderCards();
 		}
 
 		function createCard(index, syllabusItem) {
@@ -53,11 +42,11 @@
 			let index = 0;
 			$("#cardsDiv").html("");
 			for (const syllabusItem of syllabusList) {
-				console.log(syllabusItem);
-				if (syllabusItem["editMode"] == "false") {
+				if (!syllabusItem["editMode"]) {
 					var HTMLBlock = createCard(index, syllabusItem);
 				}
 				else {
+					alert("Passed.");
 					var HTMLBlock = showForm(index, syllabusItem)
 				}
 				$("#cardsDiv").append(HTMLBlock);
@@ -66,20 +55,29 @@
 		}
 
 		function showForm(index, syllabusItem) {
-			let form = `<div id="form">
-							
+			syllabusItemError = syllabusListErrors[index];
+			let formhtml = `<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}">`;
+			if (!syllabusItemError["isTitleValid"]) {
+				formhtml += `<p>Invalid Title</p>`;
+			}
+			let formhtml1 = `<input type="text" name="syllabusDescription${index}" id="syllabusDescription${index}" class="textBox" value="${syllabusItem["description"]}">`;
+			if (!syllabusItemError["isDescriptionValid"]) {
+				formhtml1 += `<p>Invalid Description</p>`;
+			}
+			let formhtml2 = `<input type="text" name="syllabusTags${index}" id="syllabusTags${index}" class="textBox" value="${syllabusItem["tags"]}">`;
+			if (!syllabusItemError["isTagsValid"]) {
+				formhtml2 += `<p>Invalid Tags</p>`;
+			}
+			let form = `<div id="form" name="formFields">
 								<div class="formIndex">
 									<a class="index" id="index">Syllabus ${index + 1}</a>
 								</div>
 								<label for="syllabusTitle${index}" class="textBoxLabel">Title</label>
-								<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}" onblur="validateForm(id)" required autocomplete="off">
-								<label id="errorsyllabusTitle${index}" style="color:red"></label><br>
+								${formhtml}
 								<label for="syllabusDescription${index}" class="textBoxLabel">Description</label>
-								<input type="text" name="syllabusDescription${index}" id="syllabusDescription${index}" class="textBox" value="${syllabusItem["description"]}" onblur="validateForm(id)" required autocomplete="off">
-								<label id="errorsyllabusDescription${index}" style="color:red"></label><br>
+								${formhtml1}
 								<label for="syllabusTags${index}" class="textBoxLabel">Tags</label>
-								<input type="text" name="syllabusTags${index}" id="syllabusTags${index}" class="textBox" value="${syllabusItem["tags"]}" onblur="validateForm(id)" required autocomplete="off">
-								<label id="errorsyllabusTags${index}" style="color:red"></label><br>
+								${formhtml2}								
 								<button id="savebtn" class="alignRight formBtn" onclick="saveData(${index})">Save</button>
 								<button class="alignRight formBtn" onclick="cancel(${index})">Cancel</button>
 						</div>`;
@@ -88,35 +86,54 @@
 
 		function cancel(index) {
 			if(index + 1 == syllabusList.length) {
-				syllabusList.splice(index, 1);
+				deleteSyllabus(index);
 			}
 			else{
-				syllabusList[index]["editMode"]= "false";
+				syllabusList[index]["editMode"]= false;
 			}
 			renderCards();
 		}
 
 		function deleteSyllabus(index) {
 			syllabusList.splice(index, 1);
+			syllabusListErrors.splice(index, 1);
 			renderCards();
 		}
 
 		function edit(index) {
-			syllabusList[index]["editMode"] = "true";
+			syllabusList[index]["editMode"] = true;
 			renderCards();
 		}
 
 		function saveData(index) {
-			if (index == syllabusList.length) {
-				alert("Passed.");
-				syllabusList.push(emptySyllabusItem);
+			let title = $("#syllabusTitle"+index).val();
+			let description = $("#syllabusDescription"+index).val();
+			let tags = $("#syllabusTags"+index).val();
+			let errorData = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
+			if (title.length <= 0) {
+				errorData.isTitleValid = false;
+				editMode = true;
 			}
-			else {
-				formData = {title:$("#syllabusTitle"+index+"").val(),description:$("#syllabusDescription"+index+"").val(),tags:$("#syllabusTags"+index+"").val(), editMode:"false"};
-				syllabusList[index] = formData;
+			if (description.length <= 0) {
+				errorData.isDescriptionValid = false;
+				editMode = true;
 			}
+			if (tags.length <= 0) {
+				errorData.isTagsValid = false;
+				editMode = true;
+			}
+			if (errorData.isTitleValid && errorData.isDescriptionValid && errorData.isTagsValid) {
+				editMode = false;
+			}
+			formData = {title:title,description:description,tags:tags, editMode:editMode};
+			console.log(formData);
+			console.log(errorData);
+			// values = JSON.stringify( $("#form").serialize());
+			// console.log(values);
+			syllabusList[index] = formData;
+			syllabusListErrors[index] = errorData;
 			renderCards();
-		};
+		}
 	</script>
 </head>
 <body>
