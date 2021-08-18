@@ -98,8 +98,11 @@
 	margin-left: 50px;
 }
 
-/*input:required:invalid, input:focus:invalid {
-	
-	 insert your own styles for invalid form input 
-	/*-moz-box-shadow: none;*/
-/*}*/
+.errorMessage {
+	margin-left: 50px;
+	color: red;
+	/*display: block;	*/
+}
+
+
+/*syllabusList[${index}][\'editMode\']=false; renderCards()*/

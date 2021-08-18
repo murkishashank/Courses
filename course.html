@@ -6,12 +6,53 @@
 	<link rel="stylesheet" type="text/css" href="course.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script type="text/javascript">
-		const syllabusList = [];
-		const syllabusListErrors = [];
+		var syllabusList = [];
+		var syllabusListErrors = [];
+
+		$(function() {
+			showRecords()
+		});
+
+		function showRecords() {
+			$.ajax({
+				url: "showRecords.php",
+				type: 'POST',
+				dataType: 'JSON',
+				success: function(response){
+					counter = 0;
+					while(counter < response.length){
+						syllabusListErrors[counter] = {editMode:false,isTitleValid:true,isDescriptionValid:true,isTagsValid:true};
+						counter++;
+					}
+					syllabusList = response;
+					renderCards(response);
+				},
+				error: function (jqXHR, exception) {
+					var msg = '';
+					if (jqXHR.status === 0) {
+						msg = 'Not Connected.\n Verify Network.';
+					} else if (jqXHR.status == 404) {
+						msg = 'Requested page not found. [404]';
+					} else if (jqXHR.status == 500) {
+						msg = 'Internal Server Error [500].';
+					} else if (exception === 'parsererror') {
+						msg = 'Requested JSON parse failed.';
+					} else if (exception === 'timeout') {
+						msg = 'Time out error.';
+					} else if (exception === 'abort') {
+						msg = 'Ajax request aborted.';
+					} else {
+					msg = 'Uncaught Error.\n' + jqXHR.responseText;
+					}
+					$('#output').html(msg);
+				},
+			});
+		}
 
 		function addSyllabus() {
-			let emptySyllabusItem = {title:"",description:"",tags:"",editMode:true};
-			let emptySyllabusItemErrors = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true};
+			index = syllabusList.length;
+			let emptySyllabusItem = {id:index,title:"",description:"",tags:"",status:1};
+			let emptySyllabusItemErrors = {editMode:true,isTitleValid:true,isDescriptionValid:true,isTagsValid:true};
 			syllabusList.push(emptySyllabusItem);
 			syllabusListErrors.push(emptySyllabusItemErrors);
 			renderCards();
@@ -27,10 +68,10 @@
 									<p class="cardDescription">${syllabusItem["description"]}</p>
 									<ul id="nav$" class="actionsNav alignRight">
 										<li class="actionsNav-item">
-											<a id="editbtn" href="javascript:edit(${index})" class="actionsNav-link">Edit</a>
+											<a id="editbtn" href="javascript:edit(${syllabusItem['id']})" class="actionsNav-link">Edit</a>
 										</li>
 										<li class="actionsNav-item">
-											<a href="javascript:deleteSyllabus(${index})" class="actionsNav-link">Delete</a>
+											<a href="javascript:deleteSyllabus(${syllabusItem['id']})" class="actionsNav-link">Delete</a>
 										</li>
 									</ul>
 								</div>
@@ -41,67 +82,86 @@
 		function renderCards() {
 			let index = 0;
 			$("#cardsDiv").html("");
+			let counter = 0;
 			for (const syllabusItem of syllabusList) {
-				if (!syllabusItem["editMode"]) {
-					var HTMLBlock = createCard(index, syllabusItem);
+				syllabusItemError = syllabusListErrors[counter];
+				if(syllabusItem["status"] == 1) {
+					if (!syllabusItemError["editMode"]) {
+						var HTMLTemplate = createCard(index, syllabusItem);
+					}
+					else {
+						var HTMLTemplate = showForm(index, syllabusItem)
+					}
+					$("#cardsDiv").append(HTMLTemplate);
+					index++;
 				}
-				else {
-					alert("Passed.");
-					var HTMLBlock = showForm(index, syllabusItem)
-				}
-				$("#cardsDiv").append(HTMLBlock);
-				index++;
+				counter++;
+
 			}
 		}
 
 		function showForm(index, syllabusItem) {
 			syllabusItemError = syllabusListErrors[index];
-			let formhtml = `<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}">`;
-			if (!syllabusItemError["isTitleValid"]) {
-				formhtml += `<p>Invalid Title</p>`;
-			}
-			let formhtml1 = `<input type="text" name="syllabusDescription${index}" id="syllabusDescription${index}" class="textBox" value="${syllabusItem["description"]}">`;
-			if (!syllabusItemError["isDescriptionValid"]) {
-				formhtml1 += `<p>Invalid Description</p>`;
-			}
-			let formhtml2 = `<input type="text" name="syllabusTags${index}" id="syllabusTags${index}" class="textBox" value="${syllabusItem["tags"]}">`;
-			if (!syllabusItemError["isTagsValid"]) {
-				formhtml2 += `<p>Invalid Tags</p>`;
-			}
 			let form = `<div id="form" name="formFields">
 								<div class="formIndex">
 									<a class="index" id="index">Syllabus ${index + 1}</a>
 								</div>
-								<label for="syllabusTitle${index}" class="textBoxLabel">Title</label>
-								${formhtml}
-								<label for="syllabusDescription${index}" class="textBoxLabel">Description</label>
-								${formhtml1}
-								<label for="syllabusTags${index}" class="textBoxLabel">Tags</label>
-								${formhtml2}								
-								<button id="savebtn" class="alignRight formBtn" onclick="saveData(${index})">Save</button>
-								<button class="alignRight formBtn" onclick="cancel(${index})">Cancel</button>
+								<label for="syllabusTitle${syllabusItem['id']}" class="textBoxLabel">Title</label>
+								<input type="text" name="syllabusTitle${syllabusItem['id']}" id="syllabusTitle${syllabusItem['id']}" class="textBox" value="${syllabusItem["title"]}">`;
+								if (!syllabusItemError["isTitleValid"]) {
+									form += `<p class="errorMessage">Invalid Title</p>`;
+								}
+						form += `<label for="syllabusDescription${syllabusItem['id']}" class="textBoxLabel">Description</label>
+								<input type="text" name="syllabusDescription${syllabusItem['id']}" id="syllabusDescription${syllabusItem['id']}" class="textBox" value="${syllabusItem["description"]}">`;
+								if (!syllabusItemError["isDescriptionValid"]) {
+									form += `<p class="errorMessage">Invalid Description</p>`;
+								}
+						form +=	`<label for="syllabusTags${syllabusItem['id']}" class="textBoxLabel">Tags</label>
+								<input type="text" name="syllabusTags${syllabusItem['id']}" id="syllabusTags${syllabusItem['id']}" class="textBox" value="${syllabusItem["tags"]}">`;
+								if (!syllabusItemError["isTagsValid"]) {
+									form += `<p class="errorMessage">Invalid Tags</p>`;
+								}
+						form +=	`<button id="savebtn" class="alignRight formBtn" onclick="saveData(${syllabusItem['id']})">Save</button>
+								<button class="alignRight formBtn" onclick="cancel(${syllabusItem['id']})">Cancel</button>
 						</div>`;
 			return form;
 		}
 
 		function cancel(index) {
-			if(index + 1 == syllabusList.length) {
-				deleteSyllabus(index);
+			syllabusItem = syllabusList[index]
+			if((syllabusItem["title"] == "") || (syllabusItem["description"] == "") || (syllabusItem  == "")) {
+				syllabusList.splice(index, 1);
+	                        syllabusListErrors.splice(index, 1);
 			}
 			else{
-				syllabusList[index]["editMode"]= false;
+				syllabusListErrors[index]["editMode"]= false;
 			}
 			renderCards();
 		}
 
 		function deleteSyllabus(index) {
-			syllabusList.splice(index, 1);
-			syllabusListErrors.splice(index, 1);
+			$.ajax({
+				url: "delete.php",
+				type: 'POST',
+				data: {id:index},
+				dataType: "JSON",
+				success: function(response){
+					if(response == 1) {
+						syllabusList[index]["status"] = 0;
+						$("#output").html("Syllabus Deleted Successfully.");
+					}else {
+						$("#output").html("Syllabus Not Deleted.");
+					}
+				},
+				error: function() {
+					$().html("Syllabus not deleted.");
+				}
+			});
 			renderCards();
 		}
 
 		function edit(index) {
-			syllabusList[index]["editMode"] = true;
+			syllabusListErrors[index]["editMode"] = true;
 			renderCards();
 		}
 
@@ -109,35 +169,50 @@
 			let title = $("#syllabusTitle"+index).val();
 			let description = $("#syllabusDescription"+index).val();
 			let tags = $("#syllabusTags"+index).val();
-			let errorData = {isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
+			let errorData = {editMode:true,isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
 			if (title.length <= 0) {
 				errorData.isTitleValid = false;
-				editMode = true;
+				errorData.editMode = true;
 			}
 			if (description.length <= 0) {
 				errorData.isDescriptionValid = false;
-				editMode = true;
+				errorData.editMode = true;
 			}
 			if (tags.length <= 0) {
 				errorData.isTagsValid = false;
-				editMode = true;
+				errorData.editMode = true;
 			}
 			if (errorData.isTitleValid && errorData.isDescriptionValid && errorData.isTagsValid) {
-				editMode = false;
+				errorData.editMode = false;
+				formData = {id:index,title:title,description:description,tags:tags,status:1};
+				$.ajax({
+					url: "insertUpdate.php",
+					type: 'POST',
+					data: formData,
+					dataType: "JSON",
+					success: function(response){
+						if(response == 1){
+							syllabusList[index] = formData;
+							syllabusListErrors[index] = errorData;
+							renderCards(syllabusList);
+							$("#output").html("Syllabus Added/Updated Successfully.");
+						}
+						else {
+							$("#output").html("Syllabus Not Added/Updated.");
+						}
+					},
+					error: function(jqXHR, exception) {
+						msg = 'Uncaught Error.\n' + jqXHR.responseText;
+					}
+				});
 			}
-			formData = {title:title,description:description,tags:tags, editMode:editMode};
-			console.log(formData);
-			console.log(errorData);
-			// values = JSON.stringify( $("#form").serialize());
-			// console.log(values);
-			syllabusList[index] = formData;
-			syllabusListErrors[index] = errorData;
 			renderCards();
 		}
 	</script>
 </head>
 <body>
 	<button class="addSyllabus alignRight" id="addSyllabus" onclick="addSyllabus()">Add Syllabus</button>
+	<p id="output"></p>
 	<div style="border: 1px solid #fff;" class="container cardContainer" id="cardsDiv"></div>
 </body>
 </html>
