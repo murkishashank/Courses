@@ -1,9 +1,8 @@
 <?php
 include('dbConnection.php');
-$sql = "SELECT * FROM Syllabus";
+$sql = "SELECT * FROM Syllabus WHERE userID = " . $_SESSION['USERID'];
 $result = $connection->query($sql);
 $syllabusList = [];
-$numberOfRows = $result->num_rows;
 while($row = $result->fetch_assoc()) {
 	$obj = new stdClass();
 	$obj->id = $row["id"];
