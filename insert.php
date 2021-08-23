@@ -14,15 +14,14 @@ if($input) {
 		$id = $connection->insert_id;
 		$responseResult = $connection->query("SELECT * FROM Syllabus WHERE id=" . $id);
 		$row = $responseResult->fetch_assoc();
-		$obj = new stdClass();
-		$obj->id = $row["id"];
-		$obj->title = $row["Title"];
-		$obj->description = $row["Description"];
-		$obj->tags = $row["Tags"];
-		$obj->status = $row["Status"];
-		$syllabusItem = $obj;
-		$response = json_encode($syllabusItem);
-		echo $response;
+		$syllabusItem = new stdClass();
+		$syllabusItem->id = $row["id"];
+		$syllabusItem->title = $row["Title"];
+		$syllabusItem->description = $row["Description"];
+		$syllabusItem->tags = $row["Tags"];
+		$syllabusItem->status = $row["Status"];
+		$syllabusItem = json_encode($syllabusItem);
+		echo $syllabusItem;
 	}
 	else{
 		// echo $connection->error . " Sql Error " . $sql;

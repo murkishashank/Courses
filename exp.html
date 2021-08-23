@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>AJAX</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		var syllabusList = [];
+
+		$(function () {
+			showRecords();
+			deleteSyllabus();
+		});
+
+		function showRecords() {
+			$.ajax({
+				url: "showRecords.php",
+				type: 'POST',
+				dataType: 'JSON',
+				success: function(response){
+					console.log(response);
+					syllabusList = response;
+					// deleteSyllabus();
+				},
+				error: function (jqXHR, exception) {
+					var message = '';
+					if (jqXHR.status === 0) {
+						message = 'Not Connected.\n Verify Network.';
+					} else if (jqXHR.status == 404) {
+						message = 'Requested page not found. [404]';
+					} else if (jqXHR.status == 500) {
+						message = 'Internal Server Error [500].';
+					} else if (exception === 'parsererror') {
+						message = 'Requested JSON parse failed.';
+					} else if (exception === 'timeout') {
+						message = 'Time out error.';
+					} else if (exception === 'abort') {
+						message = 'Ajax request aborted.';
+					} else {
+						message = 'Uncaught Error.\n' + jqXHR.responseText;
+					}
+					$('#output').html(message);
+				},
+			});
+		}
+
+		function deleteSyllabus() {
+			alert("HI");
+			const id = syllabusList[0]["id"];
+			formData = {"id":id};
+			$.ajax({
+				url: "delete.php",
+				type: 'DELETE',
+				data: JSON.stringify(formData),
+				dataType: "JSON",
+				success: function(response){
+					syllabusList.splice(0,1);
+				},
+			});
+		}
+	</script>
+</head>
+<body>
+
+</body>
+</html>

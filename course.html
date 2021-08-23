@@ -19,7 +19,7 @@
 		function getUserName() {
 			$.ajax({
 				url: "getUserName.php",
-				type: "POST",
+				type: "GET",
 				success: function(response) {
 					response = JSON.parse(response);
 					$(".dropbtn").html("Hi, " + response["userName"] + ' <i class="fas fa-caret-down"></i>');
@@ -30,7 +30,7 @@
 		function showRecords() {
 			$.ajax({
 				url: "showRecords.php",
-				type: 'POST',
+				type: 'GET',
 				dataType: 'JSON',
 				success: function(response){
 					let counter = 0;
@@ -39,9 +39,10 @@
 						counter++;
 					}
 					syllabusList = response;
-					renderCards(response);
+					renderCards();
 				},
 				error: function (jqXHR, exception) {
+					window.location.replace("login.php");
 					var message = '';
 					if (jqXHR.status === 0) {
 						message = 'Not Connected.\n Verify Network.';
@@ -56,7 +57,7 @@
 					} else if (exception === 'abort') {
 						message = 'Ajax request aborted.';
 					} else {
-					message = 'Uncaught Error.\n' + jqXHR.responseText;
+						message = 'Uncaught Error.\n' + jqXHR.responseText;
 					}
 					$('#output').html(message);
 				},
@@ -140,7 +141,7 @@
 
 		function cancel(index) {
 			syllabusItem = syllabusList[index];
-			if((syllabusItem["title"] == "") || (syllabusItem["description"] == "") || (syllabusItem  == "")) {
+			if((syllabusItem["title"] == "") || (syllabusItem["description"] == "") || (syllabusItem["tags"]  == "")) {
 				syllabusList.splice(index, 1);
 				syllabusListErrors.splice(index, 1);
 			}
@@ -160,8 +161,7 @@
 				dataType: "JSON",
 				success: function(response){
 					syllabusList.splice(index,1);
-					syllabusItem["status"] = 0;
-					renderCards(syllabusList);
+					renderCards();
 				},
 			});
 		}
@@ -212,7 +212,7 @@
 					success: function(response){
 							syllabusList[index] = response;
 							syllabusListErrors[index ] = errorData;
-							renderCards(syllabusList);
+							renderCards();
 					},
 					error: function(jqXHR, exception) {
 						msg = 'Uncaught Error.\n' + jqXHR.responseText;
@@ -224,7 +224,7 @@
 </head>
 <body>
 	<div class="dropdown alignRight logout-btn">
-		<p class="dropbtn"></p>
+		<a class="dropbtn" href="login.php">Login</a>
 		<div class="dropdown-content">
 			<a href="logout.php">Logout</a>
 		</div>

@@ -25,8 +25,8 @@ if($input) {
 			$syllabusItem->description = $row["Description"];
 			$syllabusItem->tags = $row["Tags"];
 			$syllabusItem->status = $row["Status"];
-			$response = json_encode($syllabusItem);
-			echo $response;
+			$syllabusItem = json_encode($syllabusItem);
+			echo $syllabusItem;
 		}
 		else{
 			echo $connection->error . " Sql Error " . $sql;
