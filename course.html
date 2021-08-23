@@ -100,16 +100,13 @@
 			let counter = 0;
 			for (const syllabusItem of syllabusList) {
 				syllabusItemError = syllabusListErrors[index];
-				// if(syllabusItem["status"] == 1) {
-					if (!syllabusItemError["editMode"]) {
-						var HTMLTemplate = createCard(index, syllabusItem);
-					}
-					else {
-						var HTMLTemplate = showForm(index, syllabusItem)
-					}
-					$("#cardsDiv").append(HTMLTemplate);
-					// counter++;
-				// }
+				if (!syllabusItemError["editMode"]) {
+					var HTMLTemplate = createCard(index, syllabusItem);
+				}
+				else {
+					var HTMLTemplate = showForm(index, syllabusItem)
+				}
+				$("#cardsDiv").append(HTMLTemplate);
 				index++;
 			}
 		}
