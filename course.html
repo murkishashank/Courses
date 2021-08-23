@@ -73,11 +73,11 @@
 			renderCards();
 		}
 
-		function createCard(counter, index, syllabusItem) {
+		function createCard(index, syllabusItem) {
 			let card = `<div id="card" class="syllabusCard">
 								<div id="cardBody" class="cardBody">
 									<div id="anchorDiv">
-										<a class="index">Syllabus ${counter + 1}</a>
+										<a class="index">Syllabus ${index + 1}</a>
 									</div>
 									<h2 class="cardTitle">${syllabusItem["title"]}</h2>
 									<p class="cardDescription">${syllabusItem["description"]}</p>
@@ -100,25 +100,25 @@
 			let counter = 0;
 			for (const syllabusItem of syllabusList) {
 				syllabusItemError = syllabusListErrors[index];
-				if(syllabusItem["status"] == 1) {
+				// if(syllabusItem["status"] == 1) {
 					if (!syllabusItemError["editMode"]) {
-						var HTMLTemplate = createCard(counter, index, syllabusItem);
+						var HTMLTemplate = createCard(index, syllabusItem);
 					}
 					else {
-						var HTMLTemplate = showForm(counter, index, syllabusItem)
+						var HTMLTemplate = showForm(index, syllabusItem)
 					}
 					$("#cardsDiv").append(HTMLTemplate);
-					counter++;
-				}
+					// counter++;
+				// }
 				index++;
 			}
 		}
 
-		function showForm(counter, index, syllabusItem) {
+		function showForm(index, syllabusItem) {
 			syllabusItemError = syllabusListErrors[index];
 			let form = `<div id="form" name="formFields" style="margin-top: 70px;">
 								<div class="formIndex">
-									<a class="index" id="index">Syllabus ${counter + 1}</a>
+									<a class="index" id="index">Syllabus ${index + 1}</a>
 								</div>
 								<label for="syllabusTitle${index}" class="textBoxLabel">Title</label>
 								<input type="text" name="syllabusTitle${index}" id="syllabusTitle${index}" class="textBox" value="${syllabusItem["title"]}">`;
@@ -145,7 +145,7 @@
 			syllabusItem = syllabusList[index];
 			if((syllabusItem["title"] == "") || (syllabusItem["description"] == "") || (syllabusItem  == "")) {
 				syllabusList.splice(index, 1);
-	                        syllabusListErrors.splice(index, 1);
+				syllabusListErrors.splice(index, 1);
 			}
 			else{
 				syllabusListErrors[index]["editMode"]= false;
@@ -162,8 +162,8 @@
 				data: JSON.stringify(formData),
 				dataType: "JSON",
 				success: function(response){
+					syllabusList.splice(index,1);
 					syllabusItem["status"] = 0;
-					console.log(syllabusList);
 					renderCards(syllabusList);
 				},
 			});
@@ -178,7 +178,6 @@
 		function saveData(index) {
 			syllabusItem = syllabusList[index];
 			let title = $("#syllabusTitle" + index).val();
-			alert(title);
 			let description = $("#syllabusDescription" + index).val();
 			let tags = $("#syllabusTags" + index).val();
 			let errorData = {editMode:true,isTitleValid:true,isDescriptionValid:true,isTagsValid:true}
@@ -194,6 +193,7 @@
 				errorData.isTagsValid = false;
 				errorData.editMode = true;
 			}
+
 			if (errorData.isTitleValid && errorData.isDescriptionValid && errorData.isTagsValid) {
 				errorData.editMode = false;
 				if (isEditing == 0) {
@@ -232,8 +232,6 @@
 			<a href="logout.php">Logout</a>
 		</div>
 	</div>
-	<!-- <p id="userName"></p> -->
-	<!-- <a href="logout.php" class="alignRight logout-btn">Logout</a> -->
 	<button class="addSyllabus" id="addSyllabus" onclick="addSyllabus()">Add Syllabus</button>
 	<p id="output"></p>
 	<div class="container cardContainer" id="cardsDiv"></div>

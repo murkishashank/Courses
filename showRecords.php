@@ -1,6 +1,6 @@
 <?php
 include('dbConnection.php');
-$sql = "SELECT * FROM Syllabus WHERE userID = " . $_SESSION['USERID'];
+$sql = "SELECT * FROM Syllabus WHERE Status = 1 AND userID = " . $_SESSION['USERID'];
 $result = $connection->query($sql);
 $syllabusList = [];
 while($row = $result->fetch_assoc()) {
